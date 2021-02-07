@@ -2,10 +2,8 @@
 title: Sample file
 titlepage: true
 toc: true
-author: 
-- name: Manfred Lotz
-  affiliation: GSD Platform Services
-  email: manfred.lotz@de.ibm.com
+author: Manfred Lotz
+email: manfred.lotz@de.ibm.com
 date: 2021-02-06
 ...
 
