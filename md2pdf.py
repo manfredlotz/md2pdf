@@ -16,6 +16,7 @@ Environment variables]
 - `MD2PDF_LOGO`: location of the logo
 - `MD2PDF_AUTHOR_NAME`: author's name
 - `MD2PDF_AUTHOR_EMAIL`: author's email
+- `MD2PDF_COMPANY`: company name to use
 
 Command line arguments
 
@@ -224,9 +225,12 @@ def main(
 
     year = date.today().year
 
+    company = os.environ.get('MD2PDF_COMPANY') or company
+    department = os.environ.get('MD2PDF_DEPARTMENT') or department
+
     if company:
         if confidential:
-            footer_center = f'© {year}'
+            footer_center = f'© Copyright {year} {company}'
         else:
             footer_center = f'{year} {company}'
 
@@ -241,7 +245,10 @@ def main(
     if no_title:
         pdcmd.set_m('titlepage', 'false')
 
+    logo = os.environ.get('MD2PDF_LOGO') or logo
     pdcmd.set_v('logo', logo)
+
+    logo = os.environ.get('MD2PDF_LOGO_WIDTH') or logo_width
     pdcmd.set_v('logo-width', logo_width)
 
     pdcmd.set_v('email', email)
