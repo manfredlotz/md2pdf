@@ -14,9 +14,9 @@ Environment variables]
 
 - `MD2PDF_TEMPLATE`: location of the template file
 - `MD2PDF_LOGO`: location of the logo
-- `MD2PDF_AUTHOR_NAME`: author's name
 - `MD2PDF_AUTHOR_EMAIL`: author's email
 - `MD2PDF_COMPANY`: company name to use
+- `MD2PDF_PDF_ENGINE`: specify PDF engine
 
 Command line arguments
 
@@ -30,9 +30,8 @@ Header of the markdown file
 
 - the header is in YAML
 - may contain the following values
-    - `author.name`: required
-    - `author.email`: optionalA_A~  !11111111111111111111111111111111111111spt<F4>jhl-===[]
-    - `author.affiliation`: optional
+    - `author`: required
+    - `email`: optionalA_A~  !11111111111111111111111111111111111111spt<F4>jhl-===[]
     - `title`: required
     - `titlepage`: true or false (required)
     - `subtitle`: true or false (required)
@@ -195,6 +194,7 @@ def main(
     email = os.environ.get('MD2PDF_AUTHOR_EMAIL')
     footer_center = ''
 
+    pdf_engine = os.environ.get('MD2PDF_PDF_ENGINE') or pdf_engine
     # check correct pdf-engine
     if pdf_engine not in ['xelatex', 'lualatex', 'tectonic']:
         print('--pdf-engine must be one of "xelatex", "lualatex", "tectonic"')
