@@ -3,152 +3,211 @@
 """
 Convert a markdown file to pdf or (if requested) create a tex file
 
-Configuration is in either
-- `$HOME/.md2pdf.toml`
-- `$HOME/.config/md2pdf/config.toml`
+Configuration is possible
+- in the header of the markdown file
+- thru environment variable settings
+- and command line arguments
 
-One of those must exist.
 
+
+Environment variables]
+
+- `MD2PDF_TEMPLATE`: location of the template file
+- `MD2PDF_LOGO`: location of the logo
+- `MD2PDF_AUTHOR_NAME`: author's name
+- `MD2PDF_AUTHOR_EMAIL`: author's email
+
+Command line arguments
+
+- `--template`: location of the template file
+- `--logo`: location of the logo
+- `--logo-width`: log width (default 40)
+- `--company`: company name
+- `--department`: department name
+
+Header of the markdown file
+
+- the header is in YAML
+- may contain the following values
+    - `author.name`: required
+    - `author.email`: optionalA_A~  !11111111111111111111111111111111111111spt<F4>jhl-===[]
+    - `author.affiliation`: optional
+    - `title`: required
+    - `titlepage`: true or false (required)
+    - `subtitle`: true or false (required)
+    - `toc`: true or false (required)
+    - `date`: required
 """
 
 import os
 import sys
 import subprocess
 
-import toml
+from typing import List, Optional
 from pathlib import Path
-from typing import List, Dict, Optional
-from pydantic import BaseModel
-from enum import Enum, auto
-
-import re
-import typer
 
 from datetime import date
 
+import typer
 
-__version__ = "1.1.1"
+import toml
 
-class Severity(Enum):
-     OK = auto()
-     WARN = auto()
-     ERROR = auto()
-     FATAL = auto()
 
-class Md2pdfResponse(BaseModel):
-    status: Severity
-    msg: Optional[str]
+__version__ = '1.1.1'
 
-    def to_dict(self):
-        return {
-            "status": self.status,
-            "msg": msg,
-        }
 
-    @staticmethod
-    def from_dict(response):
-        return Md2pdfResponse(
-            status=response['status'],
-            msg=response['msg'],
-        )
 
 def version_callback(value: bool) -> None:
+    """Print version information """
+
     if value:
-        typer.echo(f"md2pdf Version: {__version__}")
+        typer.echo(f'md2pdf Version: {__version__}')
         raise typer.Exit()
 
-def print_error(msg):
-    print(msg)
-    print('Exiting with errors...')
-    sys.exit(1)
 
-def find_config() -> str:
-    """Find name of config file
+class PandocCmd:
+    """Class to hold the pandoc command and its parameters
 
-    Either given by
-    - given by setting of environ variable `MD2PDF_CONFIG`, or
-    - or `$HOME/.md2pdf.toml`
-    - or `$HOME/.config/md2pdf/config.toml`
+    Some parameters are simply hardcoded others can be set with
+
+    - set_v: which sets `-V` parameters
+    - set_m: which sets `-M` parameters
+    - append: appends simple parameters
+    - extend: adds a list of parameters
+
     """
+    pandoc: List[str]
 
-    if config := os.environ.get('MD2PDF_CONFIG'):
-        if not os.path.isfile(config):
-            return Md2pdfResponse(status=Severity.FATAL, msg=f"Config file {config} doesn't exist")
-        return Md2pdfResponse(status=Severity.OK, msg=config)
+    def __init__(self, outfile: str) -> None:
+        self.pandoc = [
+            'pandoc',
+            '-o',
+            outfile,
+            '-f',
+            'markdown+smart',
+            '--number-sections',
+            '-M',
+            'colorlinks=true',
+            '-V',
+            'linkcolor=ForestGreen',
+            '-V',
+            'classoption=oneside',
+            '-V',
+            'listings',
+            '-M',
+            'toc-own-page=true',
+            '--highlight-style',
+            'pygments',
+        ]
 
-    config = f'{home}/.md2pdf.toml'
-    if os.path.isfile(config):
-        return Md2pdfResponse(status=Severity.OK, msg=config)
+    def run(self) -> None:
+        """Run pandoc command
 
-    config = f'{home}/.config/md2pdf/config.toml'
-    if os.path.isfile(config):
-        return Md2pdfResponse(status=Severity.OK, msg=config)
+        In case of error exit with return code 1
+        """
 
-    return Md2pdfResponse(status=Severity.FATAL, msg="No config file found")
+        result = subprocess.run(self.pandoc, check=True).returncode
+        if result:
+            print(f'pandoc error: {result}')
+            sys.exit(1)
 
-class Config(BaseModel):
-    template: str
-    email: str
-    name: str
+    def set_v(self, varname: str, varval: Optional[str]) -> None:
+        """Adds a `-V` parmeter.
 
-def read_config(config_file: str) -> Dict[str,str]:
-    global toml
-    toml = toml.load(config_file)
-    return toml
+        We check here if the parameter value is not None
+
+        """
+
+        if varval:
+            self.pandoc.append('-V')
+            self.pandoc.append(f'{varname}={varval}')
+
+    def set_m(self, varname: str, varval: Optional[str]) -> None:
+        """Adds a `-M` parmeter.
+
+        We check here if the parameter value is not None
+
+        """
+        if varname:
+            self.pandoc.append('-M')
+            self.pandoc.append(f'{varname}={varval}')
+
+    def append(self, argument: str) -> None:
+        """Adds a single parmeter
+
+        """
+        self.pandoc.append(argument)
+
+    def extend(self, mdfiles: List[str]) -> None:
+        """Adds a list of parmeters
+
+        """
+        self.pandoc.extend(mdfiles)
 
 
-def main(files: List[Path] = typer.Argument(default=None, dir_okay=False, exists=True),
-         config_section: str = typer.Option(None, '-s', '--section', help='Section in TOML config to use'),
-         no_toc: bool = typer.Option(False, '--no-toc', help='table of contents in PDF document'),
-         no_title: bool = typer.Option(False, '--no-title', help='title in PDF document'),
-         tex_file: bool = typer.Option(False, '--tex', help='create TeX file instead of PDF document'),
-         gsd: bool = typer.Option(False, '--gsd', help='indicate `GSD Platform Services`'),
-         ibm_confidential: bool = typer.Option(False, '--ibm-confidential', help='indicate `IBM confidential` document'),
-         ibm: bool = typer.Option(False, '--ibm', help='indicate IBM document'),
-         debug: bool = typer.Option(False, '--debug', help='turns debugging on'),
-         pdf_engine: str = typer.Option('xelatex', '--pdf-engine',
-                                        help='Specify pdf engine, one of lualatex, xelatex or tectonic '),
-         version: bool = typer.Option(None, '-V', "--version", callback=version_callback, help='Show version and exit'),
+def main(
+    files: List[Path] = typer.Argument(default=None, dir_okay=False, exists=True),
+    template: Optional[str] = typer.Option(
+        None, '--template', help='Name of template file'
+    ),
+    logo: Optional[str] = typer.Option(None, '--logo', help='Name of logo file'),
+    logo_width: Optional[str] = typer.Option(
+        None, '--logo-width', help='Logo width (default 35mm)'
+    ),
+    no_toc: bool = typer.Option(
+        False, '--no-toc', help='table of contents in PDF document'
+    ),
+    no_title: bool = typer.Option(False, '--no-title', help='title in PDF document'),
+    tex_file: bool = typer.Option(
+        False, '--tex', help='create TeX file instead of PDF document'
+    ),
+    company: Optional[str] = typer.Option(None, '--company', help='Name of company'),
+    department: Optional[str] = typer.Option(
+        None, '--department', help='Name of department'
+    ),
+    confidential: bool = typer.Option(
+        False, '--confidential', help='indicate confidential'
+    ),
+    debug: bool = typer.Option(False, '--debug', help='turns debugging on'),
+    pdf_engine: str = typer.Option(
+        'xelatex',
+        '--pdf-engine',
+        help='Specify pdf engine, one of lualatex, xelatex or tectonic ',
+    ),
+    _version: bool = typer.Option(
+        None, '-V', '--version', callback=version_callback, help='Show version and exit'
+    ),
 ):
+    """Create a PDF file from one or more markdown files"""
 
     if not files:
-        typer.echo("Error: Must specify at least one .md file.")
+        typer.echo('Error: Must specify at least one .md file.')
         raise typer.Abort()
 
     mdfiles: List[str] = [str(md) for md in files]
 
+    template = os.environ.get('MD2PDF_TEMPLATE') or template
+    if template is None:
+        print('No template specified')
+        sys.exit(1)
 
-
-    rc = find_config()
-    if rc.status == Severity.FATAL:
-        print_error(rc.msg)
-
-    config = rc.msg
-    print(read_config(config))
-
-
-    home = os.environ['HOME']
-
-    template = os.environ.get('MD2PDF_TEMPLATE') or home + "/dotfiles/pandoc/eisvogel.tex"
-    print(f'template: {template}')
-    email = os.environ.get('MD2PDF_EMAIL') or 'manfred.lotz@posteo.de'
+    email = os.environ.get('MD2PDF_AUTHOR_EMAIL')
     footer_center = ''
 
     # check correct pdf-engine
-    if not pdf_engine in ['xelatex', 'lualatex', 'tectonic']:
+    if pdf_engine not in ['xelatex', 'lualatex', 'tectonic']:
         print('--pdf-engine must be one of "xelatex", "lualatex", "tectonic"')
         sys.exit(1)
 
-    ext = ".pdf"
+    ext = '.pdf'
     if tex_file:
-        ext = ".tex"
-
+        ext = '.tex'
 
     if len(mdfiles) == 1:
         toml_file = os.path.splitext(mdfiles[0])[0] + '.toml'
 
         if os.path.exists(toml_file):
-            print(f"TOML file {toml_file} found")
+            print(f'TOML file {toml_file} found')
             parsed_toml = toml.load(toml_file)
             default_val = parsed_toml.get('default')
             if default_val is None:
@@ -159,68 +218,45 @@ def main(files: List[Path] = typer.Argument(default=None, dir_okay=False, exists
     for mdf in mdfiles:
         print(f'Compiling {mdf}')
 
-
-    # we want to check if we are in the `vimwiki_work` directory tree
-    vimwiki_work = False
     main_mdfile = os.path.realpath(mdfiles[0])
-    if re.search(r'/vimwiki_work', main_mdfile):
-        vimwiki_work = True
 
     outfile = Path(main_mdfile).stem + ext
 
-    if ibm:
-        email = os.environ.get('MD2PDF_EMAIL_IBM') or '<manfred.lotz@de.ibm.com>'
-        year = date.today().year
-        if ibm_confidential:
-            footer_center = f'© {year} IBM Confidential'
-        else:
-            footer_center = f'{year} IBM Corporation'
-        if gsd:
-            footer_center = 'GSD Platform Services'
+    year = date.today().year
 
-    pandoc = [ 'pandoc' ] + mdfiles + [
-        "-o", outfile,
-        '-f', 'markdown+smart',
-        "--number-sections",
-        '-M', 'colorlinks=true',
-        '-V', 'linkcolor=ForestGreen',
-        '-V', 'classoption=oneside',
-        '-V', "listings",
-        '-V', "footer-center=" + footer_center,
-#        '-V', "footer-center=" + email,
-#        '-V', "footer-left=" + footer_left,
-        '-M', 'toc-own-page=true',
-        '--template', template,
-        '--pdf-engine=' + pdf_engine,
-        '--highlight-style', 'pygments', ]
+    if company:
+        if confidential:
+            footer_center = f'© {year}'
+        else:
+            footer_center = f'{year} {company}'
+
+    pdcmd = PandocCmd(outfile)
+    pdcmd.append(f'--template={template}')
+    pdcmd.append(f'--pdf-engine={pdf_engine}')
+
+    pdcmd.set_v('footer-center', footer_center)
+    pdcmd.set_v('company', company)
+    pdcmd.set_v('department', department)
 
     if no_title:
-        pandoc.append('-M')
-        pandoc.append('titlepage=false')
-    # else:
-    #     pandoc.append('-M')
-    #     pandoc.append('titlepage=')
+        pdcmd.set_m('titlepage', 'false')
 
+    pdcmd.set_v('logo', logo)
+    pdcmd.set_v('logo-width', logo_width)
 
-#    if vimwiki_work:
-    if True:
-        pandoc.append('-V')
-        pandoc.append("logo=/home/manfred/dotfiles/pandoc/ibmpos_blue.jpg")
-        pandoc.append('-V')
-        pandoc.append("logo-width=41")
+    pdcmd.set_v('email', email)
 
     if not no_toc:
-        pandoc.append('--toc')
+        pdcmd.append('--toc')
+
+    pdcmd.extend(mdfiles)
 
     if debug:
-        print(' '.join(pandoc))
+        print(' '.join(pdcmd.pandoc))
 
 
-    rc = subprocess.run(pandoc).returncode
-    if rc:
-        print(f"pandoc error: {rc}")
+    pdcmd.run()
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     typer.run(main)

@@ -538,7 +538,7 @@ $else$
 $endif$
 \subtitle{$subtitle$}
 $endif$
-\author{$for(author)$$author.name$$sep$ \and $endfor$}
+\author{$for(author)$$author$$sep$ \and $endfor$}
 \date{$date$}
 $if(beamer)$
 $if(institute)$
@@ -707,7 +707,7 @@ $if(beamer)$
 $else$
 \usepackage{titling}
 \title{$title$}
-\author{$for(author)$$author.name$$sep$, $endfor$}
+\author{$for(author)$$author$$sep$, $endfor$}
 \date{$date$}
 $endif$
 
@@ -893,9 +893,9 @@ $else$
   \lhead[$if(header-right)$$header-right$$else$$date$$endif$]{$if(header-left)$$header-left$$else$$title$$endif$}
   \chead[$if(header-center)$$header-center$$else$$endif$]{$if(header-center)$$header-center$$else$$endif$}
   \rhead[$if(header-left)$$header-left$$else$$title$$endif$]{$if(header-right)$$header-right$$else$$date$$endif$}
-  \lfoot[$if(footer-right)$$footer-right$$else$\thepage$endif$]{$if(footer-left)$$footer-left$$else$$for(author)$$author.name$$sep$, $endfor$$endif$}
+  \lfoot[$if(footer-right)$$footer-right$$else$\thepage$endif$]{$if(footer-left)$$footer-left$$else$$for(author)$$author$$sep$, $endfor$$endif$}
   \cfoot[$if(footer-center)$$footer-center$$else$$endif$]{$if(footer-center)$$footer-center$$else$$endif$}
-  \rfoot[$if(footer-left)$$footer-left$$else$$for(author)$$author.name$$sep$, $endfor$$endif$]{$if(footer-right)$$footer-right$$else$\thepage$endif$}
+  \rfoot[$if(footer-left)$$footer-left$$else$$for(author)$$author$$sep$, $endfor$$endif$]{$if(footer-right)$$footer-right$$else$\thepage$endif$}
   \renewcommand{\headrulewidth}{0.4pt}
   \renewcommand{\footrulewidth}{0.4pt}
 }
@@ -971,7 +971,7 @@ $if(titlepage-background)$
   {\Large \textsf{$subtitle$}}
   $endif$
   \vskip 2em
-  \noindent {\Large \textsf{$for(author)$$author.name$$sep$, $endfor$} \vskip 0.6em \textsf{$date$}}
+  \noindent {\Large \textsf{$for(author)$$author$$sep$, $endfor$} \vskip 0.6em \textsf{$date$}}
   \vfill
 }
 $else$
@@ -984,9 +984,9 @@ $else$
   {\Large \textsf{$subtitle$}}
   $endif$
   \vskip 2em
-  $for(author)$\normalsize $author.name$\vspace{0.05in} (\emph{$author.affiliation$}) \newline\footnotesize \url{$author.email$}\vspace*{0.2in}\newline $sep$ $endfor$
+  \normalsize $author$\vspace{0.05in} $if(department)$\emph{($department$)}$endif$ \newline\footnotesize \url{$email$}\vspace*{0.2in}
+  $if(company)$\newline\normalsize\emph{$company$}$endif$
   \vfill
-
 }
 $endif$
 
