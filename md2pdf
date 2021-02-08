@@ -53,7 +53,7 @@ import typer
 import toml
 
 
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 
 
 
@@ -248,7 +248,7 @@ def main(
     logo = os.environ.get('MD2PDF_LOGO') or logo
     pdcmd.set_v('logo', logo)
 
-    logo = os.environ.get('MD2PDF_LOGO_WIDTH') or logo_width
+    logo_width = os.environ.get('MD2PDF_LOGO_WIDTH') or logo_width
     pdcmd.set_v('logo-width', logo_width)
 
     pdcmd.set_v('email', email)
