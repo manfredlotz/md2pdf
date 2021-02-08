@@ -53,6 +53,21 @@ $if(CJKmainfont)$
 \PassOptionsToPackage{space}{xeCJK}
 $endif$
 %
+
+
+%%
+%% ML end modifications
+%% ----------------------------------------------------------------
+%
+% make fonts smaller in verbatim environment
+%
+\makeatletter
+\def\verbatim@font{\normalfont\ttfamily\small}
+\makeatother
+%%
+%% ML end modifications
+%% ----------------------------------------------------------------
+
 \documentclass[
 $if(fontsize)$
   $fontsize$,
@@ -984,8 +999,17 @@ $else$
   {\Large \textsf{$subtitle$}}
   $endif$
   \vskip 2em
+
+%%
+%% ML end modifications
+%% ----------------------------------------------------------------
+%% add company and department if defined
   \normalsize $author$\vspace{0.05in} $if(department)$\emph{($department$)}$endif$ \newline\footnotesize \url{$email$}\vspace*{0.2in}
   $if(company)$\newline\normalsize\emph{$company$}$endif$
+%%
+%% ML end modifications
+%% ----------------------------------------------------------------
+
   \vfill
 }
 $endif$
@@ -1003,8 +1027,17 @@ $endif$
 
 $if(logo)$
 \noindent
-\includegraphics[width=$if(logo-width)$$logo-width$$else$100$endif$pt, left]{$logo$}
+\includegraphics[width=$if(logo-width)$$logo-width$$else$20mm$endif$, left]{$logo$}
+
+%%
+%% ML end modifications
+%% ----------------------------------------------------------------
+%% Add text to logo
 \small{\href{https://github.com/IBM/plex#ibm-plex}{(Powered by IBM Plex fonts)}}
+%%
+%% ML end modifications
+%% ----------------------------------------------------------------
+
 $endif$
 
 $if(titlepage-background)$
