@@ -1027,12 +1027,13 @@ $endif$
 
 $if(logo)$
 \noindent
-\includegraphics[width=$if(logo-width)$$logo-width$$else$20mm$endif$, left]{$logo$}
 
 %%
 %% ML end modifications
 %% ----------------------------------------------------------------
 %% Add text to logo
+%% Change default logo-width from 35mm to 20mm
+\includegraphics[width=$if(logo-width)$$logo-width$$else$20mm$endif$, left]{$logo$}
 \small{\href{https://github.com/IBM/plex#ibm-plex}{(Powered by IBM Plex fonts)}}
 %%
 %% ML end modifications
