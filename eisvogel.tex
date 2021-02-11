@@ -56,7 +56,7 @@ $endif$
 
 
 %%
-%% ML end modifications
+%% ML begin modifications
 %% ----------------------------------------------------------------
 %
 % make fonts smaller in verbatim environment
@@ -1001,7 +1001,7 @@ $else$
   \vskip 2em
 
 %%
-%% ML end modifications
+%% ML begin modifications
 %% ----------------------------------------------------------------
 %% add company and department if defined
   \normalsize $author$\vspace{0.05in} $if(department)$\emph{($department$)}$endif$ \newline\footnotesize \url{$email$}\vspace*{0.2in}
@@ -1027,13 +1027,12 @@ $endif$
 
 $if(logo)$
 \noindent
+\includegraphics[width=$if(logo-width)$$logo-width$$else$20mm$endif$, left]{$logo$}
 
 %%
-%% ML end modifications
+%% ML begin modifications
 %% ----------------------------------------------------------------
 %% Add text to logo
-%% Change default logo-width from 35mm to 20mm
-\includegraphics[width=$if(logo-width)$$logo-width$$else$20mm$endif$, left]{$logo$}
 \small{\href{https://github.com/IBM/plex#ibm-plex}{(Powered by IBM Plex fonts)}}
 %%
 %% ML end modifications
@@ -1114,6 +1113,20 @@ $endif$
 $if(linestretch)$
 \setstretch{$linestretch$}
 $endif$
+%% ----------------------------------------------------------------
+%% ML begin modifications
+%%
+$if(summary)$
+\begin{abstract}
+\begin{quote}
+  \textbf{Summary:} $summary$
+\end{quote}
+\end{abstract}
+$endif$
+%%
+%% ML end modifications
+%% ----------------------------------------------------------------
+%
 $if(has-frontmatter)$
 \mainmatter
 $endif$
