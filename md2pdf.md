@@ -1,5 +1,5 @@
 ---
-title: md2pdf
+title: md2pd
 titlepage: true
 subtitle: Creating PDF from markdown
 toc: true
@@ -38,5 +38,32 @@ Here a table of possible configuration values
 | author            |                       |                | `author:`
 | date              |                       |                | `date:`
 
+
+# Compiling more than a single markdown file
+
+
+There are basically two ways to compile more than a single markdown file in one run.
+
+1. Specify them when calling `md2pdf`
+
+Example:
+
+```
+md2pdf mydoc.md mydoc_chap1.md mydoc_chap2.md
+```
+
+Here a `mydoc.pdf` gets created.
+
+2. Specify the files to compile in a TOML file
+
+Example:
+
+```toml
+[default]
+
+files = ["mydoc.md", "mydoc_chap.md", "mydoc_chap2.md"]
+```
+
+Now run just: `md2pdf mydoc.toml`
 
 
