@@ -30,6 +30,10 @@ Dual licensed under the Apache License, Version 2.0 and MIT License.
 - The `md2pdf` script could be copied to a directory which is in the PATH.
 - The Python 3 packages `typer` and `toml` are required. 
 
+## Usage
+
+See [md2pdf.md](md2pdf.md)
+
 ## Sample documents
 
 - `test1.md`
