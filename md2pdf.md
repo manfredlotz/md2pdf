@@ -8,12 +8,19 @@ date: 2021-02-14
 ...
 
 
-# Overview
+# Configuring md2pdf
 
+`md2pdf` can be configured by setting
 
+- environment variables
+- commandline arguments, and
+- variables in the metadata header in the markdown document
 
-Variable and metadata settings
+Some of the variables in the metadata header in markdown document can be 
+overwritten by command line arguments or environment variables. Commandline
+arguments overwrite environment variables.
 
+Here a table of possible configuration values
 
 | Name              | env var               | cmdline var    | metadata     |
 | --                | --                    | --             | --           |
@@ -31,7 +38,5 @@ Variable and metadata settings
 | author            |                       |                | `author:`
 | date              |                       |                | `date:`
 
-Command line overwrites both 
 
-- environment variable settings, and
-- metadata settings in the document
+
