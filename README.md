@@ -19,7 +19,7 @@ simply hardcoded in the modified _Eisvogel_ template.
 
 
 Basically, I wrote this in my leisure time to create somehow good looking PDF documents in my
-company which (perhaps no surprice) is IBM.
+company which (perhaps no surprise) is IBM.
 
 ## Licence
 
