@@ -22,21 +22,31 @@ arguments overwrite environment variables.
 
 Here a table of possible configuration values
 
-| Name              | env var               | cmdline var    | metadata     |
-| --                | --                    | --             | --           |
-| template location | `MD2PDF_TEMPLATE`     | `template`     |              |
-| logo location     | `MD2PDF_LOGO`         | `logo`         |              |
-| logo width        | `MD2PDF_LOGO_WIDTH`   | `logo-width`   |              |
-| author's email    | `MD2PDF_AUTHOR_EMAIL` | `email`        | `email:`     |
-| company           | `MD2PDF_COMPANY`      | `company`      |              |
-| department        | `MD2PDF_DEPARTMENT`   | `department`   |              |
-| pdf engine        | `MD2PDF_PDF_ENGINE`   | `pdf-engine`   |              |
-| title             |                       |                | `title:`
-| title page        |                       | `no-titlepage` | `titlepage:` |
-| subtitle          |                       |                | `subtitle:`
-| toc               |                       | `no-toc`       | `toc:`       |
-| author            |                       |                | `author:`
-| date              |                       |                | `date:`
+| Name              | env var                        | cmdline var         | metadata     |
+| --                | --                             | --                  | --           |
+| template location | `MD2PDF_TEMPLATE`              | `template`          |              |
+| logo location     | `MD2PDF_LOGO`                  | `logo`              |              |
+| logo width        | `MD2PDF_LOGO_WIDTH`            | `logo-width`        |              |
+| author's email    | `MD2PDF_AUTHOR_EMAIL`          | `email`             | `email:`     |
+| company           | `MD2PDF_COMPANY`               | `company`           |              |
+| department        | `MD2PDF_DEPARTMENT`            | `department`        |              |
+| pdf engine        | `MD2PDF_PDF_ENGINE`            | `pdf-engine`        |              |
+| highlight style   | `MD2PDF_HIGHLIGHT_STYLE`       | `highlight-style`   |              |
+| syntax definition | `MD2PDF_SYNTAX_DEFINITION_DIR` | `syntax-definition` |              |
+| title             |                                |                     | `title:`     |
+| title page        |                                | `no-titlepage`      | `titlepage:` |
+| subtitle          |                                |                     | `subtitle:`  |
+| toc               |                                | `no-toc`            | `toc:`       |
+| author            |                                |                     | `author:`    |
+| date              |                                |                     | `date:`      |
+
+Notes
+
+- syntax definition specifies a directory which contains syntax definition files
+- a recommended source is: <https://github.com/KDE/syntax-highlighting>
+- for mainframe oriented people there is
+    - JCL: <https://github.com/KDE/syntax-highlighting/blob/master/data/syntax/jcl.xml>
+    - Rexx: <https://github.com/KDE/syntax-highlighting/blob/master/data/syntax/rexx.xml>
 
 
 # Compiling more than a single markdown file
