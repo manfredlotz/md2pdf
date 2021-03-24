@@ -17,6 +17,9 @@ Environment variables]
 - `MD2PDF_AUTHOR_EMAIL`: author's email
 - `MD2PDF_COMPANY`: company name to use
 - `MD2PDF_PDF_ENGINE`: specify PDF engine
+- `MD2PDF_SYNTAX_DEFINITION_DIR`: specify directory containing
+    additional syntax definition files
+- `MD2PDF_HIGHLIGHT_STYLE`: specify a highlight style
 
 Command line arguments
 
@@ -25,6 +28,8 @@ Command line arguments
 - `--logo-width`: log width (default 40)
 - `--company`: company name
 - `--department`: department name
+- `--highlight-style`: highlight style
+- `--syntax-definition`: directory containing syntax definition files
 
 Header of the markdown file
 
@@ -40,6 +45,7 @@ Header of the markdown file
 """
 
 import os
+import glob
 import sys
 import subprocess
 
@@ -96,8 +102,6 @@ class PandocCmd:
             'listings',
             '-M',
             'toc-own-page=true',
-            '--highlight-style',
-            'pygments',
         ]
 
     def run(self) -> None:
@@ -144,6 +148,44 @@ class PandocCmd:
         """
         self.pandoc.extend(mdfiles)
 
+def check_highlight_style(highlight_style: str) -> bool:
+    """ Check if given highlight_style is supported by pandoc
+
+        Returns False if not
+    """
+
+    valid_highlight_styles = [
+        'pygments',
+        'tango',
+        'espresso',
+        'zenburn',
+        'kate',
+        'monochrome',
+        'breezedark',
+        'haddock'
+    ]
+
+    if highlight_style in valid_highlight_styles:
+        return True
+
+    beauty_styles = ", ".join(valid_highlight_styles)
+    print(f'Invalid highlight style {highlight_style} given. Must be one of: {beauty_styles}')
+    sys.exit(1)
+
+def add_syntax_definition(pdcmd: PandocCmd, syntax_definition_dir: str) -> None:
+    """Adds all files *.xml in directory `syntax_definition_dir` as
+        `--syntax-definition` parameter to invocation of pandoc
+    """
+
+    if not os.path.exists(syntax_definition_dir):
+        print(f'syntax definition directory {syntax_definition_dir} does not exist')
+        return
+
+    filepattern = os.path.join(syntax_definition_dir, '*.xml')
+    for xmlfile in glob.glob(filepattern):
+        pdcmd.append('--syntax-definition')
+        pdcmd.append(xmlfile)
+
 
 def main(
     files: List[Path] = typer.Argument(default=None, dir_okay=False, exists=True),
@@ -154,6 +196,10 @@ def main(
     logo_width: Optional[str] = typer.Option(
         None, '--logo-width', help='Logo width (default 35mm)'
     ),
+    highlight_style: Optional[str] = typer.Option(None, '--highlight-style',
+        help='Specify coloring style to be used in highlighting source code'),
+    syntax_definition: Optional[str] = typer.Option(None, '--syntax-definition',
+        help='Specify a directory which contains syntax definition files'),
     no_toc: bool = typer.Option(
         False, '--no-toc', help='table of contents in PDF document'
     ),
@@ -170,7 +216,7 @@ def main(
     ),
     debug: bool = typer.Option(False, '--debug', help='turns debugging on'),
     pdf_engine: str = typer.Option(
-        'xelatex',
+        None,
         '--pdf-engine',
         help='Specify pdf engine, one of lualatex, xelatex or tectonic ',
     ),
@@ -186,7 +232,7 @@ def main(
 
     mdfiles: List[str] = [str(md) for md in files]
 
-    template = os.environ.get('MD2PDF_TEMPLATE') or template
+    template = template or os.environ.get('MD2PDF_TEMPLATE')
     if template is None:
         print('No template specified')
         sys.exit(1)
@@ -194,8 +240,10 @@ def main(
     email = os.environ.get('MD2PDF_AUTHOR_EMAIL')
     footer_center = ''
 
-    pdf_engine = os.environ.get('MD2PDF_PDF_ENGINE') or pdf_engine
-    # check correct pdf-engine
+    # command line overwrites `MD2PDF_PDF_ENGINE`. if both are not given
+    # then `xelatex` is the default
+    pdf_engine = pdf_engine or os.environ.get('MD2PDF_PDF_ENGINE') or 'xelatex'
+    # check that pdf-engine is one of the following
     if pdf_engine not in ['xelatex', 'lualatex', 'tectonic']:
         print('--pdf-engine must be one of "xelatex", "lualatex", "tectonic"')
         sys.exit(1)
@@ -225,8 +273,8 @@ def main(
 
     year = date.today().year
 
-    company = os.environ.get('MD2PDF_COMPANY') or company
-    department = os.environ.get('MD2PDF_DEPARTMENT') or department
+    company = company or os.environ.get('MD2PDF_COMPANY')
+    department = department or os.environ.get('MD2PDF_DEPARTMENT')
 
     if company:
         if confidential:
@@ -242,13 +290,25 @@ def main(
     pdcmd.set_v('company', company)
     pdcmd.set_v('department', department)
 
+    syntax_definition = syntax_definition or os.environ.get('MD2PDF_SYNTAX_DEFINITION_DIR')
+    if syntax_definition is not None:
+        add_syntax_definition(pdcmd, syntax_definition)
+
+    pdcmd.append('--highlight-style')
+    highlight_style = highlight_style or os.environ.get('MD2PDF_HIGHLIGHT_STYLE')
+    if highlight_style is None:
+        pdcmd.append('pygments')
+    else:
+        check_highlight_style(highlight_style)
+        pdcmd.append(highlight_style)
+
     if no_title:
         pdcmd.set_m('titlepage', 'false')
 
-    logo = os.environ.get('MD2PDF_LOGO') or logo
+    logo = logo or os.environ.get('MD2PDF_LOGO')
     pdcmd.set_v('logo', logo)
 
-    logo_width = os.environ.get('MD2PDF_LOGO_WIDTH') or logo_width
+    logo_width = logo_width or os.environ.get('MD2PDF_LOGO_WIDTH')
     pdcmd.set_v('logo-width', logo_width)
 
     pdcmd.set_v('email', email)
