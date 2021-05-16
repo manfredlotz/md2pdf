@@ -14,8 +14,10 @@ Environment variables]
 
 - `MD2PDF_TEMPLATE`: location of the template file
 - `MD2PDF_LOGO`: location of the logo
+- `MD2PDF_LOGO_WIDTH`: width of the logo
 - `MD2PDF_AUTHOR_EMAIL`: author's email
 - `MD2PDF_COMPANY`: company name to use
+- `MD2PDF_DEPARTMENT`: department name to use
 - `MD2PDF_PDF_ENGINE`: specify PDF engine
 - `MD2PDF_SYNTAX_DEFINITION_DIR`: specify directory containing
     additional syntax definition files
@@ -36,7 +38,7 @@ Header of the markdown file
 - the header is in YAML
 - may contain the following values
     - `author`: required
-    - `email`: optionalA_A~  !11111111111111111111111111111111111111spt<F4>jhl-===[]
+    - `email`: optional
     - `title`: required
     - `titlepage`: true or false (required)
     - `subtitle`: true or false (required)
@@ -101,6 +103,8 @@ class PandocCmd:
             'listings',
             '-M',
             'toc-own-page=true',
+            '--highlight-style',
+            'pygments',
         ]
 
     def run(self) -> None:
@@ -115,7 +119,7 @@ class PandocCmd:
             sys.exit(1)
 
     def set_v(self, varname: str, varval: Optional[str]) -> None:
-        """Adds a `-V` parmeter.
+        """Adds a `-V` parameter.
 
         We check here if the parameter value is not None
 
@@ -126,7 +130,7 @@ class PandocCmd:
             self.pandoc.append(f'{varname}={varval}')
 
     def set_m(self, varname: str, varval: Optional[str]) -> None:
-        """Adds a `-M` parmeter.
+        """Adds a `-M` parameter.
 
         We check here if the parameter value is not None
 
@@ -204,10 +208,11 @@ def main(
     ),
     no_number_sections: bool = typer.Option(False, '--no-number-sections', help='no section numbering'),
 
-    no_title: bool = typer.Option(False, '--no-title', help='title in PDF document'),
+    no_titlepage: bool = typer.Option(False, '--no-titlepage', help='title in PDF document'),
     tex_file: bool = typer.Option(
         False, '--tex', help='create TeX file instead of PDF document'
     ),
+    email: Optional[str] = typer.Option(None, '--email', help='Author email'),
     company: Optional[str] = typer.Option(None, '--company', help='Name of company'),
     department: Optional[str] = typer.Option(
         None, '--department', help='Name of department'
@@ -217,7 +222,7 @@ def main(
     ),
     debug: bool = typer.Option(False, '--debug', help='turns debugging on'),
     pdf_engine: str = typer.Option(
-        None,
+        'xelatex',
         '--pdf-engine',
         help='Specify pdf engine, one of lualatex, xelatex or tectonic ',
     ),
@@ -238,7 +243,7 @@ def main(
         print('No template specified')
         sys.exit(1)
 
-    email = os.environ.get('MD2PDF_AUTHOR_EMAIL')
+    email = email or os.environ.get('MD2PDF_AUTHOR_EMAIL')
     footer_center = ''
 
     # command line overwrites `MD2PDF_PDF_ENGINE`. if both are not given
@@ -306,7 +311,7 @@ def main(
     if not no_number_sections:
         pdcmd.append('--number-sections')
 
-    if no_title:
+    if no_titlepage:
         pdcmd.set_m('titlepage', 'false')
 
     logo = logo or os.environ.get('MD2PDF_LOGO')
