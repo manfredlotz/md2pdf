@@ -91,7 +91,6 @@ class PandocCmd:
             outfile,
             '-f',
             'markdown+smart',
-            '--number-sections',
             '-M',
             'colorlinks=true',
             '-V',
@@ -203,6 +202,8 @@ def main(
     no_toc: bool = typer.Option(
         False, '--no-toc', help='table of contents in PDF document'
     ),
+    no_number_sections: bool = typer.Option(False, '--no-number-sections', help='no section numbering'),
+
     no_title: bool = typer.Option(False, '--no-title', help='title in PDF document'),
     tex_file: bool = typer.Option(
         False, '--tex', help='create TeX file instead of PDF document'
@@ -301,6 +302,9 @@ def main(
     else:
         check_highlight_style(highlight_style)
         pdcmd.append(highlight_style)
+
+    if not no_number_sections:
+        pdcmd.append('--number-sections')
 
     if no_title:
         pdcmd.set_m('titlepage', 'false')
