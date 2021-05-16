@@ -320,7 +320,7 @@ def main(
     logo_width = logo_width or os.environ.get('MD2PDF_LOGO_WIDTH')
     pdcmd.set_v('logo-width', logo_width)
 
-    pdcmd.set_v('email', email)
+    pdcmd.set_m('email', email)
 
     if not no_toc:
         pdcmd.append('--toc')
