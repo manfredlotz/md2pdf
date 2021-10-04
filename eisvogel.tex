@@ -262,18 +262,21 @@ $endif$
 \usepackage{xcolor}
 \definecolor{default-linkcolor}{HTML}{A50000}
 \definecolor{default-filecolor}{HTML}{A50000}
-
 %% ----------------------------------------------------------------
 %% ML begin modifications
 %%
 %% - uncomment `default-citecolor` and `default-urlcolor`
 %% - define original IBM blue
 %% - set `default-citecolor` and `default-urlcolor` to original IBM blue
+\newcommand{\kyndrylorange}{ff452d}
 \newcommand{\ibmblue}{5a87c5}
+\newcommand{\companycolor}{\kyndrylorange}
 % \definecolor{default-citecolor}{HTML}{4077C0}
 % \definecolor{default-urlcolor}{HTML}{4077C0}
-\definecolor{default-citecolor}{HTML}{\ibmblue}
-\definecolor{default-urlcolor}{HTML}{\ibmblue}
+\definecolor{default-citecolor}{HTML}{\companycolor}
+\definecolor{default-urlcolor}{HTML}{\companycolor}
+\definecolor{ibm-blue}{HTML}{\ibmblue}
+
 %%
 %% ML end modifications
 %% ----------------------------------------------------------------
@@ -900,19 +903,17 @@ $if(beamer)$
 $else$
 $if(disable-header-and-footer)$
 $else$
-\usepackage{fancyhdr}
+\usepackage[headsepline,footsepline]{scrlayer-scrpage}
 
-\fancypagestyle{eisvogel-header-footer}{
-  \fancyhead{}
-  \fancyfoot{}
-  \lhead[$if(header-right)$$header-right$$else$$date$$endif$]{$if(header-left)$$header-left$$else$$title$$endif$}
+\newpairofpagestyles{eisvogel-header-footer}{
+  \clearpairofpagestyles
+  \ihead[$if(header-right)$$header-right$$else$$date$$endif$]{$if(header-left)$$header-left$$else$$title$$endif$}
   \chead[$if(header-center)$$header-center$$else$$endif$]{$if(header-center)$$header-center$$else$$endif$}
-  \rhead[$if(header-left)$$header-left$$else$$title$$endif$]{$if(header-right)$$header-right$$else$$date$$endif$}
-  \lfoot[$if(footer-right)$$footer-right$$else$\thepage$endif$]{$if(footer-left)$$footer-left$$else$$for(author)$$author$$sep$, $endfor$$endif$}
+  \ohead[$if(header-left)$$header-left$$else$$title$$endif$]{$if(header-right)$$header-right$$else$$date$$endif$}
+  \ifoot[$if(footer-right)$$footer-right$$else$\thepage$endif$]{$if(footer-left)$$footer-left$$else$$for(author)$$author$$sep$, $endfor$$endif$}
   \cfoot[$if(footer-center)$$footer-center$$else$$endif$]{$if(footer-center)$$footer-center$$else$$endif$}
-  \rfoot[$if(footer-left)$$footer-left$$else$$for(author)$$author$$sep$, $endfor$$endif$]{$if(footer-right)$$footer-right$$else$\thepage$endif$}
-  \renewcommand{\headrulewidth}{0.4pt}
-  \renewcommand{\footrulewidth}{0.4pt}
+  \ofoot[$if(footer-left)$$footer-left$$else$$for(author)$$author$$sep$, $endfor$$endif$]{$if(footer-right)$$footer-right$$else$\thepage$endif$}
+  \addtokomafont{pageheadfoot}{\upshape}
 }
 \pagestyle{eisvogel-header-footer}
 $if(page-background)$
@@ -966,7 +967,7 @@ $endif$
 %% - change titlepage rule color to IBM blue
 
 %% \makebox[0pt][l]{\colorRule[$if(titlepage-rule-color)$$titlepage-rule-color$$else$435488$endif$]{1.3\textwidth}{$if(titlepage-rule-height)$$titlepage-rule-height$$else$4$endif$pt}}
-\makebox[0pt][l]{\colorRule[$if(titlepage-rule-color)$$titlepage-rule-color$$else$\ibmblue$endif$]{1.3\textwidth}{$if(titlepage-rule-height)$$titlepage-rule-height$$else$4$endif$pt}}
+\makebox[0pt][l]{\colorRule[$if(titlepage-rule-color)$$titlepage-rule-color$$else$\companycolor$endif$]{1.3\textwidth}{$if(titlepage-rule-height)$$titlepage-rule-height$$else$4$endif$pt}}
 
 %%
 %% ML end modifications
@@ -1033,7 +1034,7 @@ $if(logo)$
 %% ML begin modifications
 %% ----------------------------------------------------------------
 %% Add text to logo
-\small{\href{https://github.com/IBM/plex#ibm-plex}{(Powered by IBM Plex fonts)}}
+\small{\href{https://github.com/IBM/plex#ibm-plex}{\textcolor{ibm-blue}{(Powered by IBM Plex fonts)}}}
 %%
 %% ML end modifications
 %% ----------------------------------------------------------------
